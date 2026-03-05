@@ -26,8 +26,11 @@ end
 local function load_translation_pack(language)
   local lang = normalize_language(language)
   local candidates = {
+    "SCRIPTS:/FlightAnnouncer/i18n/" .. lang .. ".luac",
     "SCRIPTS:/FlightAnnouncer/i18n/" .. lang .. ".lua",
+    "SCRIPTS:/tools/FlightAnnouncer/i18n/" .. lang .. ".luac",
     "SCRIPTS:/tools/FlightAnnouncer/i18n/" .. lang .. ".lua",
+    "i18n/" .. lang .. ".luac",
     "i18n/" .. lang .. ".lua",
   }
 

@@ -38,6 +38,7 @@ It includes:
 
 - FrSky ETHOS environment (radio or simulator)
 - WAV files stored in `SCRIPTS:/FlightAnnouncer.user/audio`
+- Background task for Flight Announcer must be enabled/running for announcements
 
 ## Installation (Radio)
 

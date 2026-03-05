@@ -10,6 +10,7 @@ Flight Announcer plays WAV files in a defined sequence whenever your configured 
 
 - FrSky ETHOS (radio or simulator)
 - WAV files stored in `SCRIPTS:/FlightAnnouncer.user/audio`
+- Flight Announcer background task must be enabled/running for announcements to play
 - Language is selected automatically from ETHOS system locale (`German`/`English`, fallback: `English`)
 - Installed script folders:
   - `SCRIPTS:/FlightAnnouncer`
@@ -28,7 +29,8 @@ Flight Announcer plays WAV files in a defined sequence whenever your configured 
 3. Add rows with **Add empty slot**.
 4. For each row, pick a WAV file from `SCRIPTS:/FlightAnnouncer.user/audio`.
 5. Press **Save**.
-6. Toggle the trigger: each new activation plays the next WAV in sequence.
+6. Ensure the **background task** is enabled.
+7. Toggle the trigger: each new activation plays the next WAV in sequence.
 
 ## User Interface
 

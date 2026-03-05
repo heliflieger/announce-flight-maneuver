@@ -42,12 +42,15 @@ local bg_task_index = nil
 
 local icon = ctx.load_tool_icon()
 
-local function create()
-  ctx.log_line("create called")
-  ctx.state.form_built = false
+local function bootstrap_runtime()
+  if ctx.state.runtime_bootstrapped then
+    return
+  end
+
   if type(ctx.apply_system_language) == "function" then
     ctx.apply_system_language()
   end
+
   store.ensureDir()
   store.ensureDefault()
 
@@ -62,6 +65,13 @@ local function create()
   end
 
   app.reload_configs()
+  ctx.state.runtime_bootstrapped = true
+end
+
+local function create()
+  ctx.log_line("create called")
+  ctx.state.form_built = false
+  bootstrap_runtime()
   ui.rebuild_form()
   return ctx.state
 end
@@ -76,12 +86,16 @@ end
 
 local function bg_init()
   ctx.log_line("bg init")
+  bootstrap_runtime()
 end
 
 local function bg_event()
 end
 
 local function bg_wakeup()
+  if not ctx.state.runtime_bootstrapped then
+    bootstrap_runtime()
+  end
   app.background()
 end
 

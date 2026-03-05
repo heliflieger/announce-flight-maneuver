@@ -4,6 +4,8 @@
 
 local M = {}
 
+local LONG_PRESS_RESET_SECONDS = 1.0
+
 function M.new(ctx, store)
   local state = ctx.state
   local constants = ctx.constants
@@ -15,6 +17,64 @@ function M.new(ctx, store)
       return ctx.t(key, params)
     end
     return tostring(key)
+  end
+
+  local function monotonic_seconds()
+    if system and type(system.getTimeCounter) == "function" then
+      local ok, value = pcall(system.getTimeCounter)
+      if ok and type(value) == "number" then
+        return value / 1000
+      end
+    end
+
+    if system and type(system.getTime) == "function" then
+      local ok, value = pcall(system.getTime)
+      if ok and type(value) == "number" then
+        return value / 100
+      end
+    end
+
+    if os and type(os.clock) == "function" then
+      local ok, value = pcall(os.clock)
+      if ok and type(value) == "number" then
+        return value
+      end
+    end
+
+    return nil
+  end
+
+  local function play_reset_beep()
+    if system then
+      if type(system.playTone) == "function" then
+        local ok = pcall(system.playTone, 1000, 1000, 0)
+        if ok then
+          return
+        end
+        local ok_alt = pcall(system.playTone, 1000, 1000)
+        if ok_alt then
+          return
+        end
+      end
+
+      if type(system.playBeep) == "function" then
+        local ok_beep = pcall(system.playBeep, 1000, 1000)
+        if ok_beep then
+          return
+        end
+        pcall(system.playBeep)
+      end
+    end
+
+    if general and type(general.playTone) == "function" then
+      pcall(general.playTone, 1000, 1000)
+    end
+  end
+
+  local function reset_press_tracking()
+    state.switch_press_started_at = nil
+    state.long_press_handled = false
+    state.reset_sequence_on_next_press = false
   end
 
   local function mark_config_choices_dirty()
@@ -122,6 +182,7 @@ function M.new(ctx, store)
     state.selected_wav_index = 1
     state.current_wav_index = 1
     state.is_switch_pressed = false
+    reset_press_tracking()
   end
 
   function api.select_config(index)
@@ -196,6 +257,7 @@ function M.new(ctx, store)
     state.selected_wav_index = 1
     state.current_wav_index = 1
     state.is_switch_pressed = false
+    reset_press_tracking()
     store.save_active_state(state.active_config_name)
   end
 
@@ -465,6 +527,14 @@ function M.new(ctx, store)
 
     if is_active and not state.is_switch_pressed then
       state.is_switch_pressed = true
+      state.switch_press_started_at = monotonic_seconds()
+      state.long_press_handled = false
+
+      if state.reset_sequence_on_next_press then
+        state.current_wav_index = 1
+        state.reset_sequence_on_next_press = false
+      end
+
       local file_to_play = ctx.normalize_wav_path(cfg.wav_files[state.current_wav_index])
       if file_to_play and file_to_play ~= "" then
         local played = false
@@ -484,8 +554,20 @@ function M.new(ctx, store)
       if state.current_wav_index > #cfg.wav_files then
         state.current_wav_index = 1
       end
+    elseif is_active and state.is_switch_pressed then
+      if not state.long_press_handled then
+        local started_at = state.switch_press_started_at
+        local now = monotonic_seconds()
+        if started_at and now and (now - started_at) >= LONG_PRESS_RESET_SECONDS then
+          state.long_press_handled = true
+          state.reset_sequence_on_next_press = true
+          play_reset_beep()
+        end
+      end
     elseif (not is_active) and state.is_switch_pressed then
       state.is_switch_pressed = false
+      state.switch_press_started_at = nil
+      state.long_press_handled = false
     end
   end
 
