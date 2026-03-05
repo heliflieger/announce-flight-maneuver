@@ -1,0 +1,96 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Sim: Deploy scripts",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"${workspaceFolder}\\.vscode\\scripts\\deploy-sim.ps1",
+				"-Workspace",
+				"${workspaceFolder}",
+				"-SimRootRelative",
+				"${config:ethos.root}"
+			],
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "ethos.Stop",
+			"type": "process",
+			"command": "${command:ethos.stop}",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "ethos.Start",
+			"type": "process",
+			"command": "${command:ethos.start}",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "ethos.SetFirmware",
+			"type": "process",
+			"command": "${command:ethos.setFirmware}",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "ethos.SetRoot",
+			"type": "process",
+			"command": "${command:ethos.setRoot}",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "ethos.StartChain",
+			"dependsOn": [
+				"ethos.SetFirmware",
+				"ethos.SetRoot",
+				"ethos.Start"
+			],
+			"dependsOrder": "sequence"
+		},
+		{
+			"label": "ethos.RestartChain",
+			"dependsOn": [
+				"ethos.Stop",
+				"ethos.StartChain"
+			],
+			"dependsOrder": "sequence"
+		},
+		{
+			"label": "Deploy & Launch [SIM]",
+			"dependsOn": [
+				"Sim: Deploy scripts",
+				"ethos.RestartChain"
+			],
+			"dependsOrder": "sequence"
+		}
+	]
+}

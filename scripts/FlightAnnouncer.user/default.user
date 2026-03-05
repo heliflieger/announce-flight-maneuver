@@ -1,0 +1,10 @@
+-- Beispielkonfiguration
+return {
+  name = "Standard Programm",
+  switch = "SB", -- Beispiel für einen Schalter (Switch B)
+  wav_files = {
+    "/audio/de/maneuvers/schwebe.wav",
+    "/audio/de/maneuvers/turn.wav",
+    "/audio/de/maneuvers/looping.wav"
+  }
+}

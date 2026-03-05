@@ -1,0 +1,28 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+
+# VS Code local state
+.vscode/*.log
+.vscode/settings.json
+.vscode/launch.json
+
+# Python virtual environments
+.venv/
+venv/
+
+# Logs
+*.log
+
+# Lua bytecode / build artifacts
+*.luac
+
+# FlightAnnouncer runtime/user state (generated)
+scripts/FlightAnnouncer.user/active.user
+scripts/FlightAnnouncer.user/.active.lua
+scripts/FlightAnnouncer.user/.switch.lua
+scripts/FlightAnnouncer.user/debug.lo
+scripts/FlightAnnouncer.user/audio/*.wav
+
+# Simulator-generated runtime state
+simulator/
