@@ -1,3 +1,7 @@
+-- Flight Announcer
+-- Author: info
+-- License: See LICENSE file (c) 2026
+
 local M = {}
 
 function M.new(ctx, store)
@@ -5,6 +9,13 @@ function M.new(ctx, store)
   local constants = ctx.constants
 
   local api = {}
+
+  local function tr(key, params)
+    if type(ctx.t) == "function" then
+      return ctx.t(key, params)
+    end
+    return tostring(key)
+  end
 
   local function mark_config_choices_dirty()
     state.config_choices_dirty = true
@@ -107,7 +118,7 @@ function M.new(ctx, store)
       state.active_config_data.switch = state.global_switch
     end
     state.active_switch_source = ctx.source_from_value(state.active_config_data.switch)
-    state.last_message = "Neues Set: " .. filename
+    state.last_message = tr("msg_new_set", {name = filename})
     state.selected_wav_index = 1
     state.current_wav_index = 1
     state.is_switch_pressed = false
@@ -157,9 +168,9 @@ function M.new(ctx, store)
     state.active_config_data = store.load(state.active_config_name)
     if not state.active_config_data then
       state.active_config_data = ctx.normalize_cfg({name = state.active_config_name})
-      state.last_message = "Load failed, defaults used"
+      state.last_message = tr("msg_load_failed_defaults")
     else
-      state.last_message = "Loaded: " .. state.active_config_name
+      state.last_message = tr("msg_loaded", {name = state.active_config_name})
     end
 
     if ctx.is_volatile_source_string and ctx.is_volatile_source_string(state.active_config_data.switch) then
@@ -226,7 +237,7 @@ function M.new(ctx, store)
     local wavs = api.active_wavs()
     wavs[#wavs + 1] = ""
     state.selected_wav_index = #wavs
-    state.last_message = "WAV entry added"
+    state.last_message = tr("msg_wav_entry_added")
   end
 
   function api.remove_empty_wav_slots()
@@ -258,21 +269,21 @@ function M.new(ctx, store)
     end
 
     if removed > 0 then
-      state.last_message = "Leere Slots entfernt: " .. tostring(removed)
+      state.last_message = tr("msg_empty_slots_removed", {count = tostring(removed)})
     else
-      state.last_message = "Keine leeren Slots gefunden"
+      state.last_message = tr("msg_no_empty_slots_found")
     end
   end
 
   function api.remove_wav_at(index)
     local wavs = api.active_wavs()
     if #wavs == 0 then
-      state.last_message = "No WAV entry to remove"
+      state.last_message = tr("msg_no_wav_entry_to_remove")
       return
     end
 
     if index < 1 or index > #wavs then
-      state.last_message = "Invalid WAV index"
+      state.last_message = tr("msg_invalid_wav_index")
       return
     end
 
@@ -283,42 +294,42 @@ function M.new(ctx, store)
     if state.selected_wav_index < 1 then
       state.selected_wav_index = 1
     end
-    state.last_message = "WAV entry removed"
+    state.last_message = tr("msg_wav_entry_removed")
   end
 
   function api.swap_wav_at(index, delta)
     local wavs = api.active_wavs()
     if #wavs < 2 then
-      state.last_message = "Need at least 2 WAV entries"
+      state.last_message = tr("msg_need_two_wav_entries")
       return
     end
 
     local from = index
     if from < 1 or from > #wavs then
-      state.last_message = "Invalid WAV index"
+      state.last_message = tr("msg_invalid_wav_index")
       return
     end
 
     local to = from + delta
     if to < 1 or to > #wavs then
-      state.last_message = "Cannot move further"
+      state.last_message = tr("msg_cannot_move_further")
       return
     end
     wavs[from], wavs[to] = wavs[to], wavs[from]
     state.selected_wav_index = to
-    state.last_message = "WAV moved"
+    state.last_message = tr("msg_wav_moved")
   end
 
   function api.duplicate_wav_at(index)
     local wavs = api.active_wavs()
     if index < 1 or index > #wavs then
-      state.last_message = "Invalid WAV index"
+      state.last_message = tr("msg_invalid_wav_index")
       return
     end
 
     table.insert(wavs, index + 1, wavs[index])
     state.selected_wav_index = index + 1
-    state.last_message = "WAV duplicated"
+    state.last_message = tr("msg_wav_duplicated")
   end
 
   function api.save_current()
@@ -339,7 +350,7 @@ function M.new(ctx, store)
 
     local ok, err = store.save(name, cfg)
     if ok then
-      state.last_message = "Saved: " .. name
+      state.last_message = tr("msg_saved", {name = name})
         store.save_active_state(name)
         store.save_global_switch(state.global_switch)
         state.available_configs = store.getAvailable()
@@ -351,7 +362,7 @@ function M.new(ctx, store)
           end
         end
     else
-      state.last_message = "Save failed: " .. tostring(err)
+      state.last_message = tr("msg_save_failed", {error = tostring(err)})
     end
   end
 
@@ -381,17 +392,17 @@ function M.new(ctx, store)
     function api.delete_active_set()
       local current_name = ctx.sanitize_config_name(state.active_config_name or "")
       if current_name == "" then
-        state.last_message = "Kein Set aktiv"
+        state.last_message = tr("msg_no_set_active")
         return
       end
 
       local ok, err = store.delete(current_name)
       if not ok then
-        state.last_message = "Loeschen fehlgeschlagen: " .. tostring(err)
+        state.last_message = tr("msg_delete_failed", {error = tostring(err)})
         return
       end
 
-      state.last_message = "Set geloescht: " .. current_name
+      state.last_message = tr("msg_set_deleted", {name = current_name})
       state.available_configs = store.getAvailable()
       mark_config_choices_dirty()
       if #state.available_configs == 0 then

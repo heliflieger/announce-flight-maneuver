@@ -1,5 +1,6 @@
 -- Flight Announcer
--- Author: Gemini
+-- Author: info
+-- License: See LICENSE file (c) 2026
 -- Version: 0.5.0
 
 local function load_module(name)
@@ -44,6 +45,9 @@ local icon = ctx.load_tool_icon()
 local function create()
   ctx.log_line("create called")
   ctx.state.form_built = false
+  if type(ctx.apply_system_language) == "function" then
+    ctx.apply_system_language()
+  end
   store.ensureDir()
   store.ensureDefault()
 

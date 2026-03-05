@@ -1,3 +1,7 @@
+-- Flight Announcer
+-- Author: info
+-- License: See LICENSE file (c) 2026
+
 local M = {}
 
 local has_lfs, lfs = pcall(require, "lfs")
@@ -100,6 +104,7 @@ function M.new(ctx)
 
   function api.save_active_state(name)
     local active_name = ctx.sanitize_config_name(name)
+
     local file, err = io.open(constants.APP_STATE_PATH, "w")
     if not file then
       ctx.log_line("Active-state save failed: " .. tostring(err))
@@ -128,11 +133,11 @@ function M.new(ctx)
       return nil
     end
 
-    if type(data.active_config) ~= "string" or data.active_config == "" then
-      return nil
+    if type(data.active_config) == "string" and data.active_config ~= "" then
+      return ctx.sanitize_config_name(data.active_config)
     end
 
-    return ctx.sanitize_config_name(data.active_config)
+    return nil
   end
 
   function api.save_global_switch(switch_value)

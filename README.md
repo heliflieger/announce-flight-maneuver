@@ -15,6 +15,7 @@ It includes:
 ## Features
 
 - Multiple announcer profiles (`*.user`) with quick switching
+- Automatic UI language based on system locale (`de`/`en`, fallback `en`)
 - Global trigger source (switch/button/slider) shared across profiles
 - Ordered WAV playlist per profile
 - WAV row actions: move up/down, duplicate, delete
@@ -28,7 +29,9 @@ It includes:
 - `scripts/FlightAnnouncer/modules/ui_form.lua` — ETHOS form UI
 - `scripts/FlightAnnouncer/modules/config_store.lua` — profile persistence (`*.user` files)
 - `scripts/FlightAnnouncer/modules/common.lua` — shared utilities/constants/source conversion
-- `scripts/FlightAnnouncer.user/` — default profile and user audio folder
+- `scripts/FlightAnnouncer/i18n/` — translation packs (`de.lua`, `en.lua`)
+- `scripts/FlightAnnouncer.user/` — default profile 
+- `scripts/FlightAnnouncer.user/audio` — user audio folder
 - `simulator/X20S_FCC/scripts/` — simulator deployment target
 
 ## Requirements

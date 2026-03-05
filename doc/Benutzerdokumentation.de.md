@@ -10,6 +10,7 @@ Flight Announcer spielt WAV-Dateien in einer definierten Reihenfolge ab, sobald 
 
 - FrSky ETHOS (Sender oder Simulator)
 - WAV-Dateien im Ordner `SCRIPTS:/FlightAnnouncer.user/audio`
+- Sprache wird automatisch aus der ETHOS-Systemsprache gewaehlt (`Deutsch`/`Englisch`, Fallback: `Englisch`)
 - Installierte Script-Ordner:
   - `SCRIPTS:/FlightAnnouncer`
   - `SCRIPTS:/FlightAnnouncer.user`
@@ -42,6 +43,7 @@ Flight Announcer spielt WAV-Dateien in einer definierten Reihenfolge ab, sobald 
 
 - Feld **Name**: Anzeigename des Sets
 - Feld **Ausloeser**: Globale Quelle fuer alle Sets
+- Die UI-Sprache wird automatisch aus der Systemeinstellung uebernommen (kein manueller Sprachschalter im Tool)
 
 ![Name und Ausloeser](img/image2.png)
 
@@ -75,6 +77,7 @@ Wichtig:
 
 - `default.user` wird automatisch erzeugt, falls kein Profil existiert.
 - Der Ausloeser wird global gespeichert (nicht pro Profil).
+- Sprachtexte liegen in `SCRIPTS:/FlightAnnouncer/i18n` (`de.lua`, `en.lua`).
 
 ## Betrieb im Simulator
 

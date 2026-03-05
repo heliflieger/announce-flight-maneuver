@@ -1,9 +1,20 @@
+-- Flight Announcer
+-- Author: info
+-- License: See LICENSE file (c) 2026
+
 local M = {}
 
 function M.new(ctx, app)
   local state = ctx.state
   local constants = ctx.constants
   local rebuild_form
+
+  local function tr(key, params)
+    if type(ctx.t) == "function" then
+      return ctx.t(key, params)
+    end
+    return tostring(key)
+  end
 
   local function run_then_rebuild(action)
     action()
@@ -30,7 +41,7 @@ function M.new(ctx, app)
 
     local line
 
-    line = form.addLine("Aktives Set")
+    line = form.addLine(tr("ui_active_set"))
     local set_slots = form.getFieldSlots(line, {200, 0})
     form.addChoiceField(line, set_slots[1], app.config_choices(), function()
       return state.active_config_index
@@ -39,20 +50,20 @@ function M.new(ctx, app)
         app.select_config(newValue)
       end)
     end)
-    form.addTextButton(line, set_slots[2], "Löschen", function()
+    form.addTextButton(line, set_slots[2], tr("ui_delete"), function()
       if type(form.openDialog) == "function" then
         form.openDialog({
-          title = "Set löschen",
-          message = "Aktives Set wirklich löschen?",
+          title = tr("dialog_delete_set_title"),
+          message = tr("dialog_delete_set_message"),
           buttons = {
             {
-              label = "Ja",
+              label = tr("ui_yes"),
               action = function()
                 return run_then_rebuild(app.delete_active_set)
               end
             },
             {
-              label = "Nein",
+              label = tr("ui_no"),
               action = function()
                 return true
               end
@@ -66,7 +77,7 @@ function M.new(ctx, app)
       return run_then_rebuild(app.delete_active_set)
     end)
 
-    line = form.addLine("Name")
+    line = form.addLine(tr("ui_name"))
     form.addTextField(line, nil, function()
       local cfg = app.active_cfg()
       return cfg.name
@@ -75,7 +86,7 @@ function M.new(ctx, app)
       cfg.name = newValue
     end)
 
-    line = form.addLine("Auslöser (Schalter/Taster/Slider)")
+    line = form.addLine(tr("ui_trigger"))
     form.addSwitchField(line, nil, function()
       local cfg = app.active_cfg()
       local saved_switch = ctx.normalize_switch_label(tostring(cfg.switch or ""))
@@ -97,25 +108,25 @@ function M.new(ctx, app)
     end, function(newValue)
       app.update_global_switch(newValue)
       local switch_label = ctx.normalize_switch_label(ctx.source_to_string(newValue))
-      state.last_message = "Auslöser: " .. tostring(switch_label)
+      state.last_message = tr("msg_trigger", {value = tostring(switch_label)})
     end)
 
-    line = form.addLine("Speichern")
-    form.addTextButton(line, nil, "Speichern", function()
+    line = form.addLine(tr("ui_save"))
+    form.addTextButton(line, nil, tr("ui_save"), function()
       return run_then_rebuild(app.save_current)
     end)
 
-    local panel = form.addExpansionPanel("WAV Reihenfolge")
+    local panel = form.addExpansionPanel(tr("ui_wav_sequence"))
 
-    line = panel:addLine("WAV Ordner")
+    line = panel:addLine(tr("ui_wav_folder"))
     form.addStaticText(line, nil, constants.USER_AUDIO_DIR)
 
-    line = panel:addLine("WAV Hinzufügen")
+    line = panel:addLine(tr("ui_wav_add"))
     local add_slots = form.getFieldSlots(line, {0, 0})
-    form.addTextButton(line, add_slots[1], "Leeren Slot hinzufügen", function()
+    form.addTextButton(line, add_slots[1], tr("ui_add_empty_slot"), function()
       return run_then_rebuild(app.add_wav_entry)
     end)
-    form.addTextButton(line, add_slots[2], "Leere Slots löschen", function()
+    form.addTextButton(line, add_slots[2], tr("ui_remove_empty_slots"), function()
       return run_then_rebuild(app.remove_empty_wav_slots)
     end)
 
@@ -137,15 +148,15 @@ function M.new(ctx, app)
         state.selected_wav_index = row_index
       end)
 
-      form.addTextButton(line, slots[2], "Menu", function()
+      form.addTextButton(line, slots[2], tr("ui_menu"), function()
         local current_wavs = app.active_wavs()
         if row_index < 1 or row_index > #current_wavs then
-          state.last_message = "Invalid WAV index"
+          state.last_message = tr("msg_invalid_wav_index")
           return true
         end
 
         if type(form.openDialog) ~= "function" then
-          state.last_message = "Action dialog not available"
+          state.last_message = tr("msg_action_dialog_unavailable")
           return true
         end
 
@@ -158,12 +169,12 @@ function M.new(ctx, app)
         end
 
         form.openDialog({
-          title = "WAV " .. tostring(row_index) .. " Actions",
-          message = "Action",
+          title = tr("ui_wav_actions_title", {index = tostring(row_index)}),
+          message = tr("ui_action"),
           width = dialog_width,
           buttons = {
             {
-              label = "Up",
+              label = tr("ui_up"),
               action = function()
                 return run_then_schedule_rebuild(function()
                   app.swap_wav_at(row_index, -1)
@@ -171,7 +182,7 @@ function M.new(ctx, app)
               end
             },
             {
-              label = "Down",
+              label = tr("ui_down"),
               action = function()
                 return run_then_schedule_rebuild(function()
                   app.swap_wav_at(row_index, 1)
@@ -179,7 +190,7 @@ function M.new(ctx, app)
               end
             },
             {
-              label = "Dup",
+              label = tr("ui_dup"),
               action = function()
                 return run_then_schedule_rebuild(function()
                   app.duplicate_wav_at(row_index)
@@ -187,7 +198,7 @@ function M.new(ctx, app)
               end
             },
             {
-              label = "Delete",
+              label = tr("ui_delete"),
               action = function()
                 return run_then_schedule_rebuild(function()
                   app.remove_wav_at(row_index)
@@ -201,12 +212,12 @@ function M.new(ctx, app)
       end)
     end
 
-    line = form.addLine("Neu Laden")
-    form.addTextButton(line, nil, "Neu Laden", function()
+    line = form.addLine(tr("ui_reload"))
+    form.addTextButton(line, nil, tr("ui_reload"), function()
       return run_then_rebuild(app.reload_configs)
     end)
 
-    line = form.addLine("Status")
+    line = form.addLine(tr("ui_status"))
     local wav_count = #app.active_wavs()
     form.addStaticText(line, nil, (state.last_message or "") .. " | WAV: " .. tostring(wav_count))
 

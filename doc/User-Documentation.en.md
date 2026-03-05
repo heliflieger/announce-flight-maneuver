@@ -10,6 +10,7 @@ Flight Announcer plays WAV files in a defined sequence whenever your configured 
 
 - FrSky ETHOS (radio or simulator)
 - WAV files stored in `SCRIPTS:/FlightAnnouncer.user/audio`
+- Language is selected automatically from ETHOS system locale (`German`/`English`, fallback: `English`)
 - Installed script folders:
   - `SCRIPTS:/FlightAnnouncer`
   - `SCRIPTS:/FlightAnnouncer.user`
@@ -42,6 +43,7 @@ Flight Announcer plays WAV files in a defined sequence whenever your configured 
 
 - **Name**: display name of the set
 - **Trigger**: global source shared by all sets
+- UI language follows system settings automatically (no manual language switch in the tool)
 
 ![Name and trigger](img/image2.png)
 
@@ -75,6 +77,7 @@ Important:
 
 - `default.user` is created automatically if no profile exists.
 - Trigger state is stored globally (not in each profile file).
+- Translation files are stored in `SCRIPTS:/FlightAnnouncer/i18n` (`de.lua`, `en.lua`).
 
 ## Simulator Workflow
 

@@ -1,3 +1,7 @@
+-- Flight Announcer
+-- Author: info
+-- License: See LICENSE file (c) 2026
+
 local M = {}
 
 local SWITCH_THRESHOLD = 500
@@ -7,6 +11,79 @@ local SWITCH_STATE_PATH = "SCRIPTS:/FlightAnnouncer.user/.switch.lua"
 local USER_AUDIO_DIR = "SCRIPTS:/FlightAnnouncer.user/audio"
 local ICON_PATH = "fa-icon.png"
 local ID_METHOD_NAMES = {"id", "getId", "identifier", "uid"}
+
+local function normalize_language(value)
+  if type(value) ~= "string" then
+    return "en"
+  end
+  local language = value:lower():match("([a-z][a-z])")
+  if language == "de" then
+    return "de"
+  end
+  return "en"
+end
+
+local function load_translation_pack(language)
+  local lang = normalize_language(language)
+  local candidates = {
+    "SCRIPTS:/FlightAnnouncer/i18n/" .. lang .. ".lua",
+    "SCRIPTS:/tools/FlightAnnouncer/i18n/" .. lang .. ".lua",
+    "i18n/" .. lang .. ".lua",
+  }
+
+  for _, path in ipairs(candidates) do
+    local chunk = loadfile(path)
+    if chunk then
+      local ok, data = pcall(chunk)
+      if ok and type(data) == "table" then
+        return data
+      end
+    end
+  end
+
+  return {}
+end
+
+local function detect_system_locale()
+  if system then
+    local fn_names = {"getLocale", "getLocaleCode", "getLanguage", "getLanguageCode"}
+    for _, fn_name in ipairs(fn_names) do
+      local fn = system[fn_name]
+      if type(fn) == "function" then
+        local ok, value = pcall(fn)
+        if ok and type(value) == "string" and value ~= "" then
+          return value
+        end
+      end
+    end
+  end
+
+  if os and type(os.setlocale) == "function" then
+    local ok, locale = pcall(os.setlocale, nil)
+    if ok and type(locale) == "string" and locale ~= "" then
+      return locale
+    end
+  end
+
+  return nil
+end
+
+local function translate(state, translations, key, params)
+  local lang = normalize_language(state and state.language)
+  local lang_pack = translations[lang] or translations.en or {}
+  local fallback = translations.en or {}
+  local template = lang_pack[key] or fallback[key] or tostring(key)
+
+  if type(params) ~= "table" then
+    return template
+  end
+
+  local rendered = template
+  for param_key, param_value in pairs(params) do
+    rendered = rendered:gsub("{" .. tostring(param_key) .. "}", tostring(param_value))
+  end
+  return rendered
+end
 
 local function is_volatile_source_string(value)
   return type(value) == "string" and value:match("^table:%s*0x[0-9a-fA-F]+$") ~= nil
@@ -370,7 +447,27 @@ local function safe_source_value(source_ref)
 end
 
 function M.new()
-  return {
+  local translations = {
+    en = load_translation_pack("en"),
+    de = load_translation_pack("de"),
+  }
+
+  local state = {
+    available_configs = {},
+    active_config_index = 1,
+    active_config_name = nil,
+    active_config_data = nil,
+    current_wav_index = 1,
+    is_switch_pressed = false,
+    selected_wav_index = 1,
+    is_building_form = false,
+    form_built = false,
+    pending_rebuild = false,
+    language = normalize_language(detect_system_locale()),
+    last_message = "",
+  }
+
+  local ctx = {
     constants = {
       SWITCH_THRESHOLD = SWITCH_THRESHOLD,
       DEBUG_LOG_PATH = DEBUG_LOG_PATH,
@@ -381,19 +478,7 @@ function M.new()
     config = {
       dir = "SCRIPTS:/FlightAnnouncer.user",
     },
-    state = {
-      available_configs = {},
-      active_config_index = 1,
-      active_config_name = nil,
-      active_config_data = nil,
-      current_wav_index = 1,
-      is_switch_pressed = false,
-      selected_wav_index = 1,
-      is_building_form = false,
-      form_built = false,
-      pending_rebuild = false,
-      last_message = "",
-    },
+    state = state,
     log_line = log_line,
     file_exists = file_exists,
     load_tool_icon = load_tool_icon,
@@ -410,6 +495,17 @@ function M.new()
     as_legacy_scripts_path = as_legacy_scripts_path,
     safe_source_value = safe_source_value,
   }
+
+  function ctx.apply_system_language()
+    state.language = normalize_language(detect_system_locale())
+    return state.language
+  end
+
+  function ctx.t(key, params)
+    return translate(state, translations, key, params)
+  end
+
+  return ctx
 end
 
 return M
