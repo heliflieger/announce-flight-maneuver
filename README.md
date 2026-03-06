@@ -18,6 +18,7 @@ It includes:
 - Automatic UI language based on system locale (`de`/`en`, fallback `en`)
 - Global trigger source (switch/button/slider) shared across profiles
 - Ordered WAV playlist per profile
+- Long press/pull on trigger (`>= 1s`) resets sequence for the next activation (with confirmation beep)
 - WAV row actions: move up/down, duplicate, delete
 - Persistent active profile and trigger state
 - Background task support for continuous trigger handling
@@ -86,4 +87,4 @@ Please keep changes focused and simulator-validated where possible.
 
 ## License
 
-Choose and add a license file before publishing (recommendation below).
+See [LICENSE](LICENSE) for license terms.

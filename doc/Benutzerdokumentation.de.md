@@ -31,6 +31,7 @@ Flight Announcer spielt WAV-Dateien in einer definierten Reihenfolge ab, sobald 
 5. Mit **Speichern** sichern.
 6. Sicherstellen, dass der **Background Task** aktiv ist.
 7. Ausloeser betaetigen: Bei jeder neuen Aktivierung wird die naechste WAV abgespielt.
+8. Ausloeser lang gedrueckt/gezogen halten (`>= 1s`): Die Reihenfolge wird fuer die naechste Aktivierung auf den Anfang zurueckgesetzt (Quittungston).
 
 ## Benutzeroberflaeche
 
@@ -95,6 +96,8 @@ Damit werden Scripts in den Simulator kopiert und die ETHOS-Kette neu gestartet.
   - Pruefen, ob Dateien in `SCRIPTS:/FlightAnnouncer.user/audio` liegen.
 - Keine Wiedergabe:
   - Triggerquelle kontrollieren (richtiger Schalter, Richtung, Position).
+- Sequenz startet nicht bei Datei 1:
+  - Ausloeser kurz loslassen und danach lang gedrueckt/gezogen halten (`>= 1s`), bis der Quittungston kommt. Die naechste Aktivierung startet wieder bei WAV 1.
 - Aenderungen nicht sichtbar:
   - **Speichern** und danach **Neu Laden**.
 

@@ -31,6 +31,7 @@ Flight Announcer plays WAV files in a defined sequence whenever your configured 
 5. Press **Save**.
 6. Ensure the **background task** is enabled.
 7. Toggle the trigger: each new activation plays the next WAV in sequence.
+8. Hold/pull the trigger for a long press (`>= 1s`): sequence is reset to the beginning for the next activation (confirmation beep).
 
 ## User Interface
 
@@ -95,6 +96,8 @@ This deploys scripts to the simulator and restarts the ETHOS task chain.
   - Check that files exist in `SCRIPTS:/FlightAnnouncer.user/audio`.
 - No playback:
   - Verify trigger source (correct switch, direction, and position).
+- Sequence does not restart at file 1:
+  - Release the trigger briefly, then hold/pull it for a long press (`>= 1s`) until the confirmation beep. The next activation starts again at WAV 1.
 - Changes not visible:
   - Use **Save**, then **Reload**.
 
